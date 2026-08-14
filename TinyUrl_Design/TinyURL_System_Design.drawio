@@ -1,0 +1,133 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT">
+  <diagram id="tinyurl-modified" name="TinyURL System Design">
+    <mxGraphModel dx="1858" dy="964" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" value="TinyURL – Modified System Design" vertex="1">
+          <mxGeometry height="55" width="1530" x="35" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="req" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf4ea;strokeColor=#5b8c5a;strokeWidth=2;fontSize=13;spacing=10;verticalAlign=top;align=left;" value="&lt;b&gt;Functional Requirements&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Convert long URL → short URL&lt;br&gt;• Redirect short URL → original URL&lt;br&gt;• Optional custom alias / expiry&lt;br&gt;• Basic click analytics&lt;br&gt;• Prevent duplicate short URLs&lt;br&gt;• Optional URL deletion" vertex="1">
+          <mxGeometry height="230" width="380" x="35" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="nfr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeaff;strokeColor=#6659a8;strokeWidth=2;fontSize=13;spacing=10;verticalAlign=top;align=left;" value="&lt;b&gt;Non-Functional Requirements&lt;/b&gt;&lt;br&gt;&lt;br&gt;• High availability&lt;br&gt;• Low latency redirects&lt;br&gt;• Horizontally scalable&lt;br&gt;• Globally unique short codes&lt;br&gt;• Durable URL mappings&lt;br&gt;• Analytics can be eventually consistent" vertex="1">
+          <mxGeometry height="230" width="350" x="435" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="est" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f4eaf4;strokeColor=#81557e;strokeWidth=2;fontSize=12;spacing=10;verticalAlign=top;align=left;" value="&lt;b&gt;Estimates&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Traffic&lt;/b&gt;&lt;br&gt;• 10M DAU&lt;br&gt;• ~2 short URLs/user/day → 20M writes/day&lt;br&gt;• ~10 redirects/short URL/day → 200M reads/day&lt;br&gt;• Peak ≈ 2–3K req/sec (design with headroom)&lt;br&gt;&lt;br&gt;&lt;b&gt;Storage&lt;/b&gt;&lt;br&gt;• Short code: 7 chars, Base62&lt;br&gt;• 62⁷ ≈ 3.5T combinations&lt;br&gt;• Long URL avg ≈ 200 bytes&lt;br&gt;• ~4 GB/day raw URL payload&lt;br&gt;• Add indexes/replication separately&lt;br&gt;• Plan for multi-year growth" vertex="1">
+          <mxGeometry height="230" width="760" x="805" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="arch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#250008;strokeColor=#d9d9d9;strokeWidth=3;fontSize=18;" value="&lt;b&gt;ARCHITECTURE&lt;/b&gt;" vertex="1">
+          <mxGeometry height="600" width="1530" x="35" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7f7f7;strokeColor=#777777;strokeWidth=2;fontSize=13;" value="Client / Browser" vertex="1">
+          <mxGeometry height="60" width="150" x="70" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="cdn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f2ff;strokeColor=#5278a7;strokeWidth=2;fontSize=12;" value="CDN / Edge Cache&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;cache redirects where safe&lt;/font&gt;" vertex="1">
+          <mxGeometry height="65" width="200" x="265" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="lb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce9ff;strokeColor=#4b6fae;strokeWidth=2;fontSize=13;" value="Load Balancer" vertex="1">
+          <mxGeometry height="65" width="200" x="265" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce9ff;strokeColor=#4b6fae;strokeWidth=2;fontSize=13;" value="API Gateway / Router" vertex="1">
+          <mxGeometry height="70" width="210" x="530" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="app1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8ff;strokeColor=#6666aa;strokeWidth=2;fontSize=12;" value="Shortener Service #1" vertex="1">
+          <mxGeometry height="65" width="190" x="805" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="app2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8ff;strokeColor=#6666aa;strokeWidth=2;fontSize=12;" value="Shortener Service #2" vertex="1">
+          <mxGeometry height="65" width="190" x="805" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="app3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8e8ff;strokeColor=#6666aa;strokeWidth=2;fontSize=12;" value="Redirect Service #3" vertex="1">
+          <mxGeometry height="65" width="190" x="805" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dff0df;strokeColor=#5c8f5c;strokeWidth=2;fontSize=12;" value="Redis Cluster&lt;br&gt;shortCode → longURL" vertex="1">
+          <mxGeometry height="70" width="220" x="1070" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="dbp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0d8;strokeColor=#a35d48;strokeWidth=2;fontSize=12;" value="URL Mapping DB – Primary&lt;br&gt;short_code, long_url, expiry" vertex="1">
+          <mxGeometry height="70" width="220" x="1070" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="dbr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0d8;strokeColor=#a35d48;strokeWidth=2;fontSize=12;" value="Read Replica(s)" vertex="1">
+          <mxGeometry height="70" width="170" x="1320" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="idgen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5dcff;strokeColor=#6f59a6;strokeWidth=2;fontSize=12;" value="ID Generator&lt;br&gt;Snowflake / Counter → Base62" vertex="1">
+          <mxGeometry height="70" width="210" x="530" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="queue" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0c9;strokeColor=#9a7a21;strokeWidth=2;fontSize=12;" value="Analytics Queue&lt;br&gt;Kafka / SQS" vertex="1">
+          <mxGeometry height="65" width="190" x="805" y="745" as="geometry" />
+        </mxCell>
+        <mxCell id="analytics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe9a8;strokeColor=#9a7a21;strokeWidth=2;fontSize=12;" value="Analytics Store&lt;br&gt;clicks, timestamps, referrer" vertex="1">
+          <mxGeometry height="65" width="220" x="1070" y="745" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dce9ff;strokeColor=#4b6fae;strokeWidth=2;fontSize=13;" value="Admin / Analytics API" vertex="1">
+          <mxGeometry height="65" width="170" x="1320" y="745" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4b9bd5;strokeWidth=2;endArrow=block;" target="cdn" value="GET /abc123">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4b9bd5;strokeWidth=2;endArrow=block;" target="lb" value="POST /shorten">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="cdn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#bdbdbd;strokeWidth=2;endArrow=block;" target="lb" value="cache miss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="lb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4b9bd5;strokeWidth=2;endArrow=block;" target="api" value="route">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4b9bd5;strokeWidth=2;endArrow=block;" target="app1" value="create">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#4b9bd5;strokeWidth=2;endArrow=block;" target="app2" value="create / lookup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#55b86a;strokeWidth=2;endArrow=block;" target="app3" value="redirect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="app1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e0a43a;strokeWidth=2;endArrow=block;" target="idgen" value="generate unique ID">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="idgen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e0a43a;strokeWidth=2;endArrow=block;" target="app1" value="Base62 code">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="app1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#55b86a;strokeWidth=2;endArrow=block;" target="redis" value="SET short → long">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="app1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e0a43a;strokeWidth=2;endArrow=block;" target="dbp" value="INSERT mapping">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="app2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#55b86a;strokeWidth=2;endArrow=block;" target="redis" value="GET">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="app2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e0a43a;strokeWidth=2;endArrow=block;" target="dbr" value="read">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="app3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#55b86a;strokeWidth=2;endArrow=block;" target="redis" value="cache lookup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="app3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e0a43a;strokeWidth=2;endArrow=block;" target="dbr" value="cache miss → read">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="dbr" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#bdbdbd;strokeWidth=2;endArrow=block;" target="dbp" value="replication">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="app3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#bdbdbd;strokeWidth=2;endArrow=block;" target="queue" value="async click event">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="queue" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#bdbdbd;strokeWidth=2;endArrow=block;" target="analytics" value="consume events">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#bdbdbd;strokeWidth=2;endArrow=block;" target="analytics" value="analytics queries">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="app3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#55b86a;strokeWidth=2;endArrow=block;" target="client" value="302 / 301 redirect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3b1720;strokeColor=#9d6673;strokeWidth=1;fontColor=#ffffff;fontSize=12;spacing=8;align=left;verticalAlign=middle;" value="&lt;b&gt;Key design changes&lt;/b&gt;&lt;br&gt;1. Added API Gateway + multiple stateless services&lt;br&gt;2. Added CDN/edge cache for hot redirects&lt;br&gt;3. Redis is a cluster for low-latency lookups&lt;br&gt;4. Primary DB + read replicas for scale&lt;br&gt;5. Analytics uses an async queue so redirects stay fast&lt;br&gt;6. ID generation is separated from the application tier" vertex="1">
+          <mxGeometry height="90" width="675" x="70" y="835" as="geometry" />
+        </mxCell>
+        <mxCell id="flow" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3b1720;strokeColor=#9d6673;strokeWidth=1;fontColor=#ffffff;fontSize=12;spacing=8;align=left;verticalAlign=middle;" value="&lt;b&gt;Typical flows&lt;/b&gt;&lt;br&gt;&lt;b&gt;Create:&lt;/b&gt; Client → LB → API → Shortener → ID Generator → DB + Redis → short URL&lt;br&gt;&lt;b&gt;Redirect:&lt;/b&gt; Client → CDN/Service → Redis → DB replica on miss → 3xx redirect&lt;br&gt;&lt;b&gt;Analytics:&lt;/b&gt; Redirect Service → Queue → Analytics Store (async)" vertex="1">
+          <mxGeometry height="90" width="685" x="805" y="835" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
